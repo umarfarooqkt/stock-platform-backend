@@ -1,0 +1,279 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Serviced-Oriented Stock Platform
+
+Parameters:
+  FrontendBucketName:
+    Type: String
+  FrontendLoginSubDomain:
+    Type: String
+  EnvType:
+    Type: String
+    Default: local
+
+Conditions:
+  IsLocal: !Equals [ !Ref EnvType, local ]
+
+Globals:
+  Function:
+    Timeout: 10
+    Runtime: nodejs12.x
+    Environment:
+      Variables:
+        ORIGIN: !Sub "https://${FrontendCloudFrontDistribution.DomainName}"
+  Api:
+    Cors:
+      AllowMethods: "'OPTIONS,GET,POST,PUT,DELETE'"
+      AllowHeaders: "'Content-Type, Authorization'"
+      AllowOrigin: !If [ IsLocal, "'*'", !Sub "'https://${FrontendCloudFrontDistribution.DomainName}'" ]
+
+Resources:
+  ##################### Lambda Functions & API Events #####################
+
+  GraphHelloFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/graph/hello
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Events:
+        ApiGet:
+          Type: Api
+          Properties:
+            Path: /graph/hello
+            Method: GET
+        ApiPost:
+          Type: Api
+          Properties:
+            Path: /graph/hello
+            Method: POST
+
+  PortfolioHelloFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/portfolio/hello
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Events:
+        ApiGet:
+          Type: Api
+          Properties:
+            Path: /portfolio/hello
+            Method: GET
+        ApiPost:
+          Type: Api
+          Properties:
+            Path: /portfolio/hello
+            Method: POST
+
+  StockHelloFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/stock/hello
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Events:
+        ApiGet:
+          Type: Api
+          Properties:
+            Path: /stock/hello
+            Method: GET
+        ApiPost:
+          Type: Api
+          Properties:
+            Path: /stock/hello
+            Method: POST
+
+  UserRegistrationHelloFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/user-registration
+      Handler: index.handler
+      Runtime: nodejs12.x
+
+  ##################### SNS Topics #####################
+
+  UserCreateTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: User-Create
+
+  StockPriceUpdateTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: Stock-Price-Update
+
+  ##################### RDS Resources #####################
+
+  StockDatabaseCredentials:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: Stock database password
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "root"}'
+        GenerateStringKey: 'password'
+        ExcludeCharacters: '\/@" '
+      Name: /prod/databases/stock
+
+  StockInstanceAttachment:
+    Type: AWS::SecretsManager::SecretTargetAttachment
+    Properties:
+      SecretId: !Ref StockDatabaseCredentials
+      TargetId: !Ref StockDatabase
+      TargetType: AWS::RDS::DBInstance
+
+  StockDatabase:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceClass: db.t2.micro # Free Tier
+      DBName: Stock
+      DBInstanceIdentifier: stock
+      Engine: mysql
+      AllocatedStorage: 20 # GB
+      MasterUsername: !Join ["", [ "{{resolve:secretsmanager:", !Ref StockDatabaseCredentials, ":SecretString:username}}" ]]
+      MasterUserPassword: !Join ["", [ "{{resolve:secretsmanager:", !Ref StockDatabaseCredentials, ":SecretString:password}}" ]]
+
+  PortfolioDatabaseCredentials:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: Portfolio database password
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "root"}'
+        GenerateStringKey: 'password'
+        ExcludeCharacters: '\/@" '
+      Name: /prod/databases/portfolio
+
+  PortfolioInstanceAttachment:
+    Type: AWS::SecretsManager::SecretTargetAttachment
+    Properties:
+      SecretId: !Ref PortfolioDatabaseCredentials
+      TargetId: !Ref PortfolioDatabase
+      TargetType: AWS::RDS::DBInstance
+
+  PortfolioDatabase:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceClass: db.t2.micro # Free Tier
+      DBName: Portfolio
+      DBInstanceIdentifier: portfolio
+      Engine: mysql
+      AllocatedStorage: 20 # GB
+      MasterUsername: !Join ["", [ "{{resolve:secretsmanager:", !Ref PortfolioDatabaseCredentials, ":SecretString:username}}" ]]
+      MasterUserPassword: !Join ["", [ "{{resolve:secretsmanager:", !Ref PortfolioDatabaseCredentials, ":SecretString:password}}" ]]
+
+  ##################### Frontend Resources #####################
+
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref FrontendBucketName
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action: "s3:GetObject"
+            Effect: "Allow"
+            Principal:
+              CanonicalUser: !GetAtt FrontendOriginAccessIdentity.S3CanonicalUserId
+            Resource: !Sub "${FrontendBucket.Arn}/*"
+          - Action: "s3:ListBucket"
+            Effect: "Allow"
+            Principal:
+              CanonicalUser: !GetAtt FrontendOriginAccessIdentity.S3CanonicalUserId
+            Resource: !GetAtt FrontendBucket.Arn
+
+  # Set policy to only allow access through CloudFront (HTTPS)
+  FrontendOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Join [ "", [ "access-identity-", !GetAtt FrontendBucket.DomainName ] ]
+
+  FrontendCloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Origins:
+          - DomainName: !GetAtt FrontendBucket.DomainName
+            Id: S3-Frontend-site
+            S3OriginConfig:
+              OriginAccessIdentity: !Join [ "", [ "origin-access-identity/cloudfront/", !Ref FrontendOriginAccessIdentity ] ]
+        DefaultRootObject: index.html
+        DefaultCacheBehavior:
+          ForwardedValues:
+            QueryString: true
+          TargetOriginId: S3-Frontend-site
+          ViewerProtocolPolicy: redirect-to-https
+        CustomErrorResponses:
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+
+  ##################### Cognito Resources for User Auth #####################
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: Users
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: UserPoolClient
+      AllowedOAuthFlowsUserPoolClient: true
+      SupportedIdentityProviders:
+        - COGNITO
+      CallbackURLs:
+        - !Sub "https://${FrontendCloudFrontDistribution.DomainName}/"
+      LogoutURLs:
+        - !Sub "https://${FrontendCloudFrontDistribution.DomainName}/"
+      AllowedOAuthFlows:
+        - implicit
+      AllowedOAuthScopes:
+        - user-api/user:manage
+      GenerateSecret: false
+    DependsOn: UserPoolResourceServer
+
+  UserPoolResourceServer:
+    Type: AWS::Cognito::UserPoolResourceServer
+    Properties:
+      Identifier: user-api
+      Name: User Manage
+      Scopes:
+        - ScopeName: "user:manage"
+          ScopeDescription: "Management of users' own resources"
+      UserPoolId: !Ref UserPool
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Ref FrontendLoginSubDomain
+      UserPoolId: !Ref UserPool
+
+Outputs:
+  ApiGateway:
+    Description: "Backend API Gateway endpoint URL"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  FrontendCloudFrontEndpoint:
+    Description: "Frontend CloudFront Distribution URL"
+    Value: !GetAtt FrontendCloudFrontDistribution.DomainName
+  FrontendLoginUrl:
+    Description: "User Sign In URL"
+    Value: !Sub
+      - "https://${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com/login?client_id=${UserPoolClient}&response_type=token&scope=${Scope}&redirect_uri=${RedirectURI}"
+      - Scope: "user-api/user:manage"
+        RedirectURI: !Sub "https://${FrontendCloudFrontDistribution.DomainName}/"
