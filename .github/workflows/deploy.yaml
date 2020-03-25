@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - master
-#    paths:
-#      - 'lambdas/**'
-#      - 'template.yaml'
+    paths:
+      - 'lambdas/**'
+      - 'template.yaml'
 
 env:
   STACK_NAME: stock-platform-backend
