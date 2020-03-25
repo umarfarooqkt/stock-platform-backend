@@ -102,6 +102,26 @@ Resources:
             Path: /stock/hello
             Method: POST
 
+  DirectoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/directory
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Policies:
+        - Statement:
+            - Sid: ApiGatewayGetPolicy
+              Effect: Allow
+              Action:
+                - apigateway:GET
+              Resource: !Sub "arn:aws:apigateway:${AWS::Region}::/*"
+      Events:
+        ApiGet:
+          Type: Api
+          Properties:
+            Path: /directory
+            Method: GET
+
   UserRegistrationHelloFunction:
     Type: AWS::Serverless::Function
     Properties:

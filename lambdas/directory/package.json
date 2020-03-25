@@ -1,0 +1,14 @@
+{
+  "name": "stock-platform-backend-directory",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Jordan Sne",
+  "license": "UNLICENSED",
+  "scripts": {
+    "test": "../node_modules/.bin/jest"
+  },
+  "dependencies": {
+    "http-status": "^1.4.2"
+  },
+  "devDependencies": {}
+}

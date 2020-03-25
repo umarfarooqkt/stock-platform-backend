@@ -9,6 +9,11 @@
     "test": "jest --silent",
     "start": "sam build && sam local start-api --env-vars local-test/env.json"
   },
+  "jest": {
+    "modulePathIgnorePatterns": [
+      "<rootDir>/.aws-sam/"
+    ]
+  },
   "dependencies": {
     "stock-platform-backend-graph-hello": "./lambdas/graph/hello",
     "stock-platform-backend-portfolio-hello": "./lambdas/portfolio/hello",
