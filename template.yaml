@@ -302,7 +302,7 @@ Resources:
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: Users
+      UserPoolName: Stock-Platform-Users
       Policies:
         PasswordPolicy:
           MinimumLength: 8
@@ -339,10 +339,15 @@ Resources:
           ScopeDescription: "Management of users' own resources"
       UserPoolId: !Ref UserPool
 
+  # Note: Due to a CloudFormation limitation, after creating this resource, an A record must be manually created
+  # that points to the 'Alias Target' as indicated in the Cognito Console (unfortunately CF does not currently
+  # support returning this value for other resources to reference).
   UserPoolDomain:
     Type: AWS::Cognito::UserPoolDomain
     Properties:
-      Domain: !Ref FrontendLoginSubDomain
+      Domain: !Sub "auth.${FrontendDomain}"
+      CustomDomainConfig:
+        CertificateArn: !Ref WildcardCertificate
       UserPoolId: !Ref UserPool
 
 Outputs:
@@ -358,6 +363,6 @@ Outputs:
   FrontendLoginUrl:
     Description: "User Sign In URL"
     Value: !Sub
-      - "https://${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com/login?client_id=${UserPoolClient}&response_type=token&scope=${Scope}&redirect_uri=${RedirectURI}"
+      - "https://${UserPoolDomain}/login?client_id=${UserPoolClient}&response_type=token&scope=${Scope}&redirect_uri=${RedirectURI}"
       - Scope: "user-api/user:manage"
         RedirectURI: !Sub "https://${FrontendDomain}/"
