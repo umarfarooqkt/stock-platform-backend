@@ -24,6 +24,13 @@ Globals:
       Variables:
         ORIGIN: !Sub "https://${FrontendDomain}"
   Api:
+    Domain:
+      BasePath:
+        - /v1
+      DomainName: !Sub "api.${FrontendDomain}"
+      CertificateArn: !Ref WildcardCertificate
+      Route53:
+        HostedZoneId: !Ref FrontendRouteZone
     Cors:
       AllowMethods: "'OPTIONS,GET,POST,PUT,DELETE'"
       AllowHeaders: "'Content-Type, Authorization'"
@@ -260,10 +267,19 @@ Resources:
           MinimumProtocolVersion: TLSv1.2_2018
           SslSupportMethod: sni-only
 
+  ##################### Certificates & Route 53 #####################
+
+  # Note: The CNAME record to perform DNS validation for these two certs. was manually created in the console.
   FrontendCertificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
       DomainName: !Ref FrontendDomain
+      ValidationMethod: DNS
+
+  WildcardCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Sub "*.${FrontendDomain}"
       ValidationMethod: DNS
 
   FrontendRouteZone:
@@ -331,14 +347,14 @@ Resources:
 
 Outputs:
   ApiGateway:
-    Description: "Backend API Gateway endpoint URL"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Description: "Backend API Gateway URL"
+    Value: !Sub "https://api.${FrontendDomain}/v1/"
   FrontendDomainNameServers:
-    Description: "Frontend Domain Route 53 Name Servers"
+    Description: "Domain Route 53 Name Servers"
     Value: !Join [ ",", !GetAtt FrontendRouteZone.NameServers ]
   FrontendCloudFrontEndpoint:
-    Description: "Frontend CloudFront Distribution Domain"
-    Value: !GetAtt FrontendCloudFrontDistribution.DomainName
+    Description: "Frontend CloudFront Distribution"
+    Value: !Sub "https://${FrontendDomain}/"
   FrontendLoginUrl:
     Description: "User Sign In URL"
     Value: !Sub
