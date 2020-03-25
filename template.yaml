@@ -5,6 +5,8 @@ Description: Serviced-Oriented Stock Platform
 Parameters:
   FrontendBucketName:
     Type: String
+  FrontendDomain:
+    Type: String
   FrontendLoginSubDomain:
     Type: String
   EnvType:
@@ -20,12 +22,12 @@ Globals:
     Runtime: nodejs12.x
     Environment:
       Variables:
-        ORIGIN: !Sub "https://${FrontendCloudFrontDistribution.DomainName}"
+        ORIGIN: !Sub "https://${FrontendDomain}"
   Api:
     Cors:
       AllowMethods: "'OPTIONS,GET,POST,PUT,DELETE'"
       AllowHeaders: "'Content-Type, Authorization'"
-      AllowOrigin: !If [ IsLocal, "'*'", !Sub "'https://${FrontendCloudFrontDistribution.DomainName}'" ]
+      AllowOrigin: !If [ IsLocal, "'*'", !Sub "'https://${FrontendDomain}'" ]
 
 Resources:
   ##################### Lambda Functions & API Events #####################
@@ -235,6 +237,8 @@ Resources:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
+        Aliases:
+          - !Ref FrontendDomain
         Enabled: true
         Origins:
           - DomainName: !GetAtt FrontendBucket.DomainName
@@ -252,7 +256,30 @@ Resources:
             ResponseCode: 200
             ResponsePagePath: /index.html
         ViewerCertificate:
-          CloudFrontDefaultCertificate: true
+          AcmCertificateArn: !Ref FrontendCertificate
+          MinimumProtocolVersion: TLSv1.2_2018
+          SslSupportMethod: sni-only
+
+  FrontendCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref FrontendDomain
+      ValidationMethod: DNS
+
+  FrontendRouteZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !Ref FrontendDomain
+
+  FrontendRouteCloudFrontRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Ref FrontendDomain
+      Type: A
+      HostedZoneId: !Ref FrontendRouteZone
+      AliasTarget:
+        DNSName: !GetAtt FrontendCloudFrontDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2 # CloudFront global zone ID
 
   ##################### Cognito Resources for User Auth #####################
 
@@ -276,9 +303,9 @@ Resources:
       SupportedIdentityProviders:
         - COGNITO
       CallbackURLs:
-        - !Sub "https://${FrontendCloudFrontDistribution.DomainName}/"
+        - !Sub "https://${FrontendDomain}/"
       LogoutURLs:
-        - !Sub "https://${FrontendCloudFrontDistribution.DomainName}/"
+        - !Sub "https://${FrontendDomain}/"
       AllowedOAuthFlows:
         - implicit
       AllowedOAuthScopes:
@@ -306,12 +333,15 @@ Outputs:
   ApiGateway:
     Description: "Backend API Gateway endpoint URL"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  FrontendDomainNameServers:
+    Description: "Frontend Domain Route 53 Name Servers"
+    Value: !Join [ ",", !GetAtt FrontendRouteZone.NameServers ]
   FrontendCloudFrontEndpoint:
-    Description: "Frontend CloudFront Distribution URL"
+    Description: "Frontend CloudFront Distribution Domain"
     Value: !GetAtt FrontendCloudFrontDistribution.DomainName
   FrontendLoginUrl:
     Description: "User Sign In URL"
     Value: !Sub
       - "https://${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com/login?client_id=${UserPoolClient}&response_type=token&scope=${Scope}&redirect_uri=${RedirectURI}"
       - Scope: "user-api/user:manage"
-        RedirectURI: !Sub "https://${FrontendCloudFrontDistribution.DomainName}/"
+        RedirectURI: !Sub "https://${FrontendDomain}/"
