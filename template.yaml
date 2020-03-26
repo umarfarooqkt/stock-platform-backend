@@ -173,10 +173,11 @@ Resources:
     Type: AWS::RDS::DBInstance
     Properties:
       DBInstanceClass: db.t2.micro # Free Tier
-      DBName: Stock
-      DBInstanceIdentifier: stock
+      DBName: stock
+      DBInstanceIdentifier: stock-instance
       Engine: mysql
       AllocatedStorage: 20 # GB
+      PubliclyAccessible: false
       MasterUsername: !Join ["", [ "{{resolve:secretsmanager:", !Ref StockDatabaseCredentials, ":SecretString:username}}" ]]
       MasterUserPassword: !Join ["", [ "{{resolve:secretsmanager:", !Ref StockDatabaseCredentials, ":SecretString:password}}" ]]
 
@@ -201,10 +202,11 @@ Resources:
     Type: AWS::RDS::DBInstance
     Properties:
       DBInstanceClass: db.t2.micro # Free Tier
-      DBName: Portfolio
-      DBInstanceIdentifier: portfolio
+      DBName: portfolio
+      DBInstanceIdentifier: portfolio-instance
       Engine: mysql
       AllocatedStorage: 20 # GB
+      PubliclyAccessible: false
       MasterUsername: !Join ["", [ "{{resolve:secretsmanager:", !Ref PortfolioDatabaseCredentials, ":SecretString:username}}" ]]
       MasterUserPassword: !Join ["", [ "{{resolve:secretsmanager:", !Ref PortfolioDatabaseCredentials, ":SecretString:password}}" ]]
 
