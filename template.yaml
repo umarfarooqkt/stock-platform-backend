@@ -349,6 +349,7 @@ Resources:
       CustomDomainConfig:
         CertificateArn: !Ref WildcardCertificate
       UserPoolId: !Ref UserPool
+    DependsOn: FrontendRouteCloudFrontRecord # Root A record is needed to register a custom domain
 
 Outputs:
   ApiGateway:
