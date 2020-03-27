@@ -305,12 +305,23 @@ Resources:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: Stock-Platform-Users
+      AliasAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
       Policies:
         PasswordPolicy:
           MinimumLength: 8
           RequireUppercase: true
           RequireLowercase: true
           RequireNumbers: true
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Required: true
+        - Name: name
+          AttributeDataType: String
+          Required: true
 
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
