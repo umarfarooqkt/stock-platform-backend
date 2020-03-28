@@ -7,7 +7,9 @@
   "private": true,
   "scripts": {
     "test": "jest --silent",
-    "start": "sam build && sam local start-api --env-vars local-test/env.json"
+    "start": "sam build && sam local start-api --env-vars local-test/env.json",
+    "local-db": "docker run --name stock-backend-test-db -p 3306:3306 -e MYSQL_ROOT_PASSWORD=abcd123 -d mysql:latest",
+    "connect-db": "mysql -u root --password=abcd123 --protocol=tcp"
   },
   "jest": {
     "modulePathIgnorePatterns": [

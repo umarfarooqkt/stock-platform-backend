@@ -23,6 +23,7 @@ Globals:
     Environment:
       Variables:
         ORIGIN: !Sub "https://${FrontendDomain}"
+        DB_OVERRIDE: ""
     VpcConfig:
       SecurityGroupIds:
         - !GetAtt StockPlatformVPC.DefaultSecurityGroup
@@ -87,6 +88,16 @@ Resources:
       CodeUri: lambdas/portfolio/hello
       Handler: index.handler
       Runtime: nodejs12.x
+      Environment:
+        Variables:
+          RDS_SECRET_ARN: !Ref PortfolioDatabaseCredentials
+      Policies:
+        - Statement:
+            - Sid: GetRDSSecret
+              Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Ref PortfolioDatabaseCredentials
       Events:
         ApiGet:
           Type: Api
@@ -105,6 +116,16 @@ Resources:
       CodeUri: lambdas/stock/hello
       Handler: index.handler
       Runtime: nodejs12.x
+      Environment:
+        Variables:
+          RDS_SECRET_ARN: !Ref StockDatabaseCredentials
+      Policies:
+        - Statement:
+            - Sid: GetRDSSecret
+              Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Ref StockDatabaseCredentials
       Events:
         ApiGet:
           Type: Api

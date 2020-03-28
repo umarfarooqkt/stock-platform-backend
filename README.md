@@ -17,8 +17,16 @@ $ yarn install
 
 ## Running API Locally
 
-Ensure the docker engine is running and run:
-
+Ensure the docker engine is running.
+Run this to start and connect to the local MySQL database:
+```
+$ yarn run local-db
+```
+If you'd like to connect using the MySQL CLI client:
+```
+$ yarn run connect-db
+```
+Then run the following to start the local API:
 ```
 $ yarn start
 ```
