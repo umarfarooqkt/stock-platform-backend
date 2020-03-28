@@ -23,6 +23,12 @@ Globals:
     Environment:
       Variables:
         ORIGIN: !Sub "https://${FrontendDomain}"
+    VpcConfig:
+      SecurityGroupIds:
+        - !GetAtt StockPlatformVPC.DefaultSecurityGroup
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
   Api:
     Domain:
       BasePath:
@@ -149,6 +155,38 @@ Resources:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: Stock-Price-Update
+
+  ##################### VPC Resources #####################
+
+  StockPlatformVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: stock-platform-vpc
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.1.0/24
+      VpcId: !Ref StockPlatformVPC
+      AvailabilityZone: us-east-1b
+      Tags:
+        - Key: Name
+          Value: sp-private1
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.2.0/24
+      VpcId: !Ref StockPlatformVPC
+      AvailabilityZone: us-east-1c
+      Tags:
+        - Key: Name
+          Value: sp-private2
 
   ##################### RDS Resources #####################
 
