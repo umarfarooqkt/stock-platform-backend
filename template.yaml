@@ -23,6 +23,13 @@ Globals:
     Environment:
       Variables:
         ORIGIN: !Sub "https://${FrontendDomain}"
+        DB_OVERRIDE: ""
+    VpcConfig:
+      SecurityGroupIds:
+        - !GetAtt StockPlatformVPC.DefaultSecurityGroup
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
   Api:
     Domain:
       BasePath:
@@ -81,6 +88,16 @@ Resources:
       CodeUri: lambdas/portfolio/hello
       Handler: index.handler
       Runtime: nodejs12.x
+      Environment:
+        Variables:
+          RDS_SECRET_ARN: !Ref PortfolioDatabaseCredentials
+      Policies:
+        - Statement:
+            - Sid: GetRDSSecret
+              Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Ref PortfolioDatabaseCredentials
       Events:
         ApiGet:
           Type: Api
@@ -99,6 +116,16 @@ Resources:
       CodeUri: lambdas/stock/hello
       Handler: index.handler
       Runtime: nodejs12.x
+      Environment:
+        Variables:
+          RDS_SECRET_ARN: !Ref StockDatabaseCredentials
+      Policies:
+        - Statement:
+            - Sid: GetRDSSecret
+              Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Ref StockDatabaseCredentials
       Events:
         ApiGet:
           Type: Api
@@ -150,6 +177,123 @@ Resources:
     Properties:
       TopicName: Stock-Price-Update
 
+  ##################### VPC Resources #####################
+
+  StockPlatformVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: stock-platform-vpc
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.0.0/24
+      VpcId: !Ref StockPlatformVPC
+      AvailabilityZone: us-east-1a
+      Tags:
+        - Key: Name
+          Value: sp-public
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref StockPlatformVPC
+      Tags:
+        - Key: Name
+          Value: sp-public
+
+  PublicRouteTableInternetRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: sp-ig
+
+  InternetGatewayVPCAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref StockPlatformVPC
+
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.1.0/24
+      VpcId: !Ref StockPlatformVPC
+      AvailabilityZone: us-east-1b
+      Tags:
+        - Key: Name
+          Value: sp-private1
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.2.0/24
+      VpcId: !Ref StockPlatformVPC
+      AvailabilityZone: us-east-1c
+      Tags:
+        - Key: Name
+          Value: sp-private2
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref StockPlatformVPC
+      Tags:
+        - Key: Name
+          Value: sp-private
+
+  PrivateRouteTableNATRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref PrivateNATGateway
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateNATGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt PrivateNATGatewayPublicIP.AllocationId
+      SubnetId: !Ref PublicSubnet
+
+  PrivateNATGatewayPublicIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: sp-nat-ip
+
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateSubnet1
+
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateSubnet2
+
   ##################### RDS Resources #####################
 
   StockDatabaseCredentials:
@@ -174,12 +318,13 @@ Resources:
     Properties:
       DBInstanceClass: db.t2.micro # Free Tier
       DBName: stock
-      DBInstanceIdentifier: stock-instance
+      DBInstanceIdentifier: sp-stock-instance
       Engine: mysql
       AllocatedStorage: 20 # GB
       PubliclyAccessible: false
       MasterUsername: !Join ["", [ "{{resolve:secretsmanager:", !Ref StockDatabaseCredentials, ":SecretString:username}}" ]]
       MasterUserPassword: !Join ["", [ "{{resolve:secretsmanager:", !Ref StockDatabaseCredentials, ":SecretString:password}}" ]]
+      DBSubnetGroupName: !Ref DatabaseSubnetGroup
 
   PortfolioDatabaseCredentials:
     Type: AWS::SecretsManager::Secret
@@ -203,12 +348,22 @@ Resources:
     Properties:
       DBInstanceClass: db.t2.micro # Free Tier
       DBName: portfolio
-      DBInstanceIdentifier: portfolio-instance
+      DBInstanceIdentifier: sp-portfolio-instance
       Engine: mysql
       AllocatedStorage: 20 # GB
       PubliclyAccessible: false
       MasterUsername: !Join ["", [ "{{resolve:secretsmanager:", !Ref PortfolioDatabaseCredentials, ":SecretString:username}}" ]]
       MasterUserPassword: !Join ["", [ "{{resolve:secretsmanager:", !Ref PortfolioDatabaseCredentials, ":SecretString:password}}" ]]
+      DBSubnetGroupName: !Ref DatabaseSubnetGroup
+
+  DatabaseSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: sp-db-subnet
+      DBSubnetGroupDescription: Stock Platform Database Subnets
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
 
   ##################### Frontend Resources #####################
 
