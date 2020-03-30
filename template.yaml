@@ -110,12 +110,12 @@ Resources:
             Path: /portfolio/hello
             Method: POST
 
-  StockHelloFunction:
+  StockFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambdas/stock/hello
+      CodeUri: lambdas/stock
       Handler: index.handler
-      Runtime: nodejs12.x
+      Runtime: python3.7
       Environment:
         Variables:
           RDS_SECRET_ARN: !Ref StockDatabaseCredentials
@@ -127,16 +127,31 @@ Resources:
                 - secretsmanager:GetSecretValue
               Resource: !Ref StockDatabaseCredentials
       Events:
-        ApiGet:
+        ApiCompanyGet:
           Type: Api
           Properties:
-            Path: /stock/hello
+            Path: /stock/company
             Method: GET
-        ApiPost:
+        ApiCompanyPost:
           Type: Api
           Properties:
-            Path: /stock/hello
+            Path: /stock/company
             Method: POST
+        ApiQuoteGet:
+          Type: Api
+          Properties:
+            Path: /stock/quote
+            Method: GET
+        ApiQuotePost:
+          Type: Api
+          Properties:
+            Path: /stock/quote
+            Method: POST
+        ApiPing:
+          Type: Api
+          Properties:
+            Path: /stock/ping
+            Method: GET
 
   DirectoryFunction:
     Type: AWS::Serverless::Function

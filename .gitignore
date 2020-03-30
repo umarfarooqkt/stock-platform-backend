@@ -128,5 +128,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+venv/
+__pycache__
 
 # End of https://www.gitignore.io/api/osx,node,linux,windows

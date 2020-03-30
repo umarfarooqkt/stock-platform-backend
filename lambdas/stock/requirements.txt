@@ -1,0 +1,9 @@
+cffi==1.14.0
+cryptography==2.8
+dnspython==1.16.0
+mysql-connector-python==8.0.19
+protobuf==3.6.1
+pycparser==2.20
+PyMySQL==0.9.3
+six==1.14.0
+SQLAlchemy==1.3.15
