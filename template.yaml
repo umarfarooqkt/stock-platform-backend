@@ -22,7 +22,7 @@ Globals:
     Runtime: nodejs12.x
     Environment:
       Variables:
-        ORIGIN: !Sub "https://${FrontendDomain}"
+        ORIGIN: !Sub "'*'"
         DB_OVERRIDE: ""
     VpcConfig:
       SecurityGroupIds:
@@ -41,7 +41,7 @@ Globals:
     Cors:
       AllowMethods: "'OPTIONS,GET,POST,PUT,DELETE'"
       AllowHeaders: "'Content-Type, Authorization'"
-      AllowOrigin: !If [ IsLocal, "'*'", !Sub "'https://${FrontendDomain}'" ]
+      AllowOrigin: "'*'"
 
 Resources:
   ##################### Lambda Functions & API Events #####################
