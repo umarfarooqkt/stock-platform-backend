@@ -22,7 +22,7 @@ Globals:
     Runtime: nodejs12.x
     Environment:
       Variables:
-        ORIGIN: !Sub "'*'"
+        ORIGIN: "*"
         DB_OVERRIDE: ""
     VpcConfig:
       SecurityGroupIds:
@@ -42,6 +42,13 @@ Globals:
       AllowMethods: "'OPTIONS,GET,POST,PUT,DELETE'"
       AllowHeaders: "'Content-Type, Authorization'"
       AllowOrigin: "'*'"
+    GatewayResponses:
+      DEFAULT_4XX:
+        ResponseParameters:
+          Headers:
+            Access-Control-Allow-Origin: "'*'"
+        ResponseTemplates:
+          application/json: "{\"error\": $context.error.messageString }"
 
 Resources:
   ##################### Lambda Functions & API Events #####################
