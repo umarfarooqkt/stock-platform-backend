@@ -22,7 +22,7 @@ Globals:
     Runtime: nodejs12.x
     Environment:
       Variables:
-        ORIGIN: !Sub "'*'"
+        ORIGIN: "*"
         DB_OVERRIDE: ""
     VpcConfig:
       SecurityGroupIds:
