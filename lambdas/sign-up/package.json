@@ -1,12 +1,9 @@
 {
-  "name": "stock-platform-backend-user-registration",
+  "name": "stock-platform-backend-sign-up",
   "version": "1.0.0",
   "main": "index.js",
   "author": "Jordan Sne",
   "license": "UNLICENSED",
-  "scripts": {
-    "test": "../node_modules/.bin/jest"
-  },
   "dependencies": {},
   "devDependencies": {}
 }
