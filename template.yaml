@@ -187,17 +187,71 @@ Resources:
       Handler: index.handler
       Runtime: nodejs12.x
 
-  ##################### SNS Topics #####################
+  ##################### SNS & SQS Topics #####################
 
   UserCreateTopic:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: User-Create
+      Subscription:
+        - Endpoint: !GetAtt UserCreatePortfolioQueue.Arn
+          Protocol: sqs
+
+  UserCreatePortfolioQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: User-Create-Portfolio
+
+  UserCreatePortfolioQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref UserCreatePortfolioQueue
+      PolicyDocument:
+        Version: "2012-10-17"
+        Id: UserCreatePortfolioQueuePolicy
+        Statement:
+          - Sid: SendSQSMessage
+            Principal: "*"
+            Effect: Allow
+            Action:
+              - sqs:SendMessage
+            Resource: !GetAtt UserCreatePortfolioQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref UserCreateTopic
 
   StockPriceUpdateTopic:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: Stock-Price-Update
+      Subscription:
+        - Endpoint: !GetAtt StockPricePortfolioQueue.Arn
+          Protocol: sqs
+
+  StockPricePortfolioQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: Stock-Price-Portfolio
+
+  StockPricePortfolioQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref StockPricePortfolioQueue
+      PolicyDocument:
+        Version: "2012-10-17"
+        Id: StockPricePortfolioQueuePolicy
+        Statement:
+          - Sid: SendSQSMessage
+            Principal: "*"
+            Effect: Allow
+            Action:
+              - sqs:SendMessage
+            Resource: !GetAtt StockPricePortfolioQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref StockPriceUpdateTopic
 
   ##################### VPC Resources #####################
 
