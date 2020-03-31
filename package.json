@@ -19,8 +19,8 @@
   "dependencies": {
     "stock-platform-backend-graph-hello": "./lambdas/graph/hello",
     "stock-platform-backend-portfolio-hello": "./lambdas/portfolio/hello",
-    "stock-platform-backend-stock-hello": "./lambdas/stock/hello",
-    "stock-platform-backend-sign-up": "./lambdas/sign-up"
+    "stock-platform-backend-stock": "./lambdas/stock",
+    "stock-platform-backend-user-registration": "./lambdas/user-registration"
   },
   "devDependencies": {
     "aws-sdk": "^2.639.0",

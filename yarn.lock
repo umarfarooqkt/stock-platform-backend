@@ -3071,14 +3071,11 @@ stock-platform-backend-portfolio-hello@./lambdas/portfolio/hello:
     http-status "^1.4.2"
     mysql "^2.18.1"
 
-stock-platform-backend-sign-up@./lambdas/sign-up:
-  version "1.0.0"
+stock-platform-backend-stock@./lambdas/stock:
+  version "0.0.0"
 
-stock-platform-backend-stock-hello@./lambdas/stock/hello:
+stock-platform-backend-user-registration@./lambdas/user-registration:
   version "1.0.0"
-  dependencies:
-    http-status "^1.4.2"
-    mysql "^2.18.1"
 
 string-length@^3.1.0:
   version "3.1.0"
