@@ -180,12 +180,29 @@ Resources:
             Path: /directory
             Method: GET
 
-  UserRegistrationHelloFunction:
+  SignUpHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambdas/user-registration
+      CodeUri: lambdas/sign-up
       Handler: index.handler
       Runtime: nodejs12.x
+      Environment:
+        Variables:
+          USER_CREATE_SNS_TOPIC: !Ref UserCreateTopic
+      Policies:
+        - Statement:
+            - Sid: PublishToUserCreateTopic
+              Effect: Allow
+              Action:
+                - Publish
+              Resource: !Ref UserCreateTopic
+      Events:
+        CognitoCreateUser:
+          Type: Cognito
+          Properties:
+            Trigger:
+              - PostConfirmation
+            UserPool: !Ref UserPool
 
   ##################### SNS & SQS Topics #####################
 
