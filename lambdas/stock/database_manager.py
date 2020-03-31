@@ -6,6 +6,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import secrets_manager
 import os
 
 # Constants
@@ -17,11 +18,12 @@ AWS_REGION = os.environ.get("AWS_REGION")
 MYSQL_CONNECTOR = 'mysql+mysqlconnector'
 
 if DB_OVERRIDE:
-    host = DB_OVERRIDE
-    user = 'root'
-    password = 'abcd123'
-    database = 'stock'
-    port = '3306'
+    secrets = secrets_manager.get_secret()
+    host = secrets["host"]
+    user = secrets["username"]
+    password = secrets["password"]
+    database = secrets["dbname"]
+    port = secrets["port"]
     log = False
 else:
     host = 'localhost'
