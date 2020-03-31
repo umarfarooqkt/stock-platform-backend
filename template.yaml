@@ -22,7 +22,7 @@ Globals:
     Runtime: nodejs12.x
     Environment:
       Variables:
-        ORIGIN: !Sub "https://${FrontendDomain}"
+        ORIGIN: "*"
         DB_OVERRIDE: ""
     VpcConfig:
       SecurityGroupIds:
@@ -31,6 +31,13 @@ Globals:
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
   Api:
+    Auth:
+      Authorizers:
+        CognitoAuthorizer:
+          AuthType: COGNITO_USER_POOLS
+          UserPoolArn: !GetAtt UserPool.Arn
+          Identity:
+            Header: Authorization
     Domain:
       BasePath:
         - /v1
@@ -41,7 +48,14 @@ Globals:
     Cors:
       AllowMethods: "'OPTIONS,GET,POST,PUT,DELETE'"
       AllowHeaders: "'Content-Type, Authorization'"
-      AllowOrigin: !If [ IsLocal, "'*'", !Sub "'https://${FrontendDomain}'" ]
+      AllowOrigin: "'*'"
+    GatewayResponses:
+      DEFAULT_4XX:
+        ResponseParameters:
+          Headers:
+            Access-Control-Allow-Origin: "'*'"
+        ResponseTemplates:
+          application/json: "{\"error\": $context.error.messageString }"
 
 Resources:
   ##################### Lambda Functions & API Events #####################
@@ -104,11 +118,19 @@ Resources:
           Properties:
             Path: /portfolio/hello
             Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+              AuthorizationScopes:
+                - user-api/user:manage
         ApiPost:
           Type: Api
           Properties:
             Path: /portfolio/hello
             Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+              AuthorizationScopes:
+                - user-api/user:manage
 
   StockFunction:
     Type: AWS::Serverless::Function
@@ -173,24 +195,95 @@ Resources:
             Path: /directory
             Method: GET
 
-  UserRegistrationHelloFunction:
+  SignUpHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambdas/user-registration
+      CodeUri: lambdas/sign-up
       Handler: index.handler
       Runtime: nodejs12.x
+      Environment:
+        Variables:
+          USER_CREATE_SNS_TOPIC: !Ref UserCreateTopic
+      Policies:
+        - Statement:
+            - Sid: PublishToUserCreateTopic
+              Effect: Allow
+              Action:
+                - sns:Publish
+              Resource: !Ref UserCreateTopic
+      Events:
+        CognitoCreateUser:
+          Type: Cognito
+          Properties:
+            Trigger:
+              - PostConfirmation
+            UserPool: !Ref UserPool
 
-  ##################### SNS Topics #####################
+  ##################### SNS & SQS Topics #####################
 
   UserCreateTopic:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: User-Create
+      Subscription:
+        - Endpoint: !GetAtt UserCreatePortfolioQueue.Arn
+          Protocol: sqs
+
+  UserCreatePortfolioQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: User-Create-Portfolio
+
+  UserCreatePortfolioQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref UserCreatePortfolioQueue
+      PolicyDocument:
+        Version: "2012-10-17"
+        Id: UserCreatePortfolioQueuePolicy
+        Statement:
+          - Sid: SendSQSMessage
+            Principal: "*"
+            Effect: Allow
+            Action:
+              - sqs:SendMessage
+            Resource: !GetAtt UserCreatePortfolioQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref UserCreateTopic
 
   StockPriceUpdateTopic:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: Stock-Price-Update
+      Subscription:
+        - Endpoint: !GetAtt StockPricePortfolioQueue.Arn
+          Protocol: sqs
+
+  StockPricePortfolioQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: Stock-Price-Portfolio
+
+  StockPricePortfolioQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref StockPricePortfolioQueue
+      PolicyDocument:
+        Version: "2012-10-17"
+        Id: StockPricePortfolioQueuePolicy
+        Statement:
+          - Sid: SendSQSMessage
+            Principal: "*"
+            Effect: Allow
+            Action:
+              - sqs:SendMessage
+            Resource: !GetAtt StockPricePortfolioQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref StockPriceUpdateTopic
 
   ##################### VPC Resources #####################
 
