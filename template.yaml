@@ -96,12 +96,12 @@ Resources:
             Path: /graph/hello
             Method: POST
 
-  PortfolioHelloFunction:
+  PortfolioFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambdas/portfolio/hello
+      CodeUri: lambdas/portfolio
       Handler: index.handler
-      Runtime: nodejs12.x
+      Runtime: python3.7
       Environment:
         Variables:
           RDS_SECRET_ARN: !Ref PortfolioDatabaseCredentials
@@ -113,10 +113,10 @@ Resources:
                 - secretsmanager:GetSecretValue
               Resource: !Ref PortfolioDatabaseCredentials
       Events:
-        ApiGet:
+        ApiPingGet:
           Type: Api
           Properties:
-            Path: /portfolio/hello
+            Path: /portfolio/ping
             Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
