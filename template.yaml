@@ -31,6 +31,13 @@ Globals:
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
   Api:
+    Auth:
+      Authorizers:
+        CognitoAuthorizer:
+          AuthType: COGNITO_USER_POOLS
+          UserPoolArn: !GetAtt UserPool.Arn
+          Identity:
+            Header: Authorization
     Domain:
       BasePath:
         - /v1
@@ -111,11 +118,19 @@ Resources:
           Properties:
             Path: /portfolio/hello
             Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+              AuthorizationScopes:
+                - user-api/user:manage
         ApiPost:
           Type: Api
           Properties:
             Path: /portfolio/hello
             Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+              AuthorizationScopes:
+                - user-api/user:manage
 
   StockHelloFunction:
     Type: AWS::Serverless::Function
