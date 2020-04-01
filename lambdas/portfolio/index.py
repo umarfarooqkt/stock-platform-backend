@@ -87,7 +87,7 @@ def get_handler(query_params, path, user_id):
             resp = get_all_favourites(query_params, user_id)
         elif "allunfavourites" in path:
             resp = get_all_unfavourites(query_params, user_id)
-        elif "portfolio" in path:
+        elif "getportfolio" in path:
             resp = get_user_portfolio(query_params, user_id)
         else:
             msg = "The '" + path + "' is not supported"

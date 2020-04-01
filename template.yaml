@@ -116,19 +116,31 @@ Resources:
           Properties:
             Path: /portfolio/ping
             Method: GET
-            Auth:
-              Authorizer: CognitoAuthorizer
-              AuthorizationScopes:
-                - user-api/user:manage
-        ApiPost:
+        ApiFavouriteAllGet:
           Type: Api
           Properties:
-            Path: /portfolio/hello
+            Path: /portfolio/allfavourites
+            Method: GET
+        ApiUnFavouriteAllGet:
+          Type: Api
+          Properties:
+            Path: /portfolio/allunfavourites
+            Method: GET
+        ApiGetPortfolio:
+          Type: Api
+          Properties:
+            Path: /portfolio/getportfolio
+            Method: GET
+        ApiPostAddFavourite:
+          Type: Api
+          Properties:
+            Path: /portfolio/addfavourite
             Method: POST
-            Auth:
-              Authorizer: CognitoAuthorizer
-              AuthorizationScopes:
-                - user-api/user:manage
+        ApiPostUpdateFavourite:
+          Type: Api
+          Properties:
+            Path: /portfolio/updatefavourite
+            Method: POST
 
   StockFunction:
     Type: AWS::Serverless::Function
@@ -171,6 +183,11 @@ Resources:
           Type: Api
           Properties:
             Path: /stock/ping
+            Method: GET
+        ApiGetAllStocks:
+          Type: Api
+          Properties:
+            Path: /stock/getallstocks
             Method: GET
 
   DirectoryFunction:
