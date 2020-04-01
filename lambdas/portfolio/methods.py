@@ -9,7 +9,7 @@ from database_manager import db
 from model import Favourite
 from model import Portfolio
 import sqlalchemy
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 
 def get_user(user_id):
     user = db.query(Portfolio)\
@@ -40,11 +40,32 @@ def get_all_unfavourite(user_id):
 
 # to create new entry, don't forget to check/add user first
 def add_favourite(user_id, stock_symbol, favourite_status):
-    pass
+    old_favourite = db.query(Portfolio)\
+        .filter(Favourite.user_id == user_id)\
+            .filter(and_(
+                Favourite.stock_symbol == stock_symbol
+            ))
+    if old_favourite is None:
+        new_favourite = Portfolio(user_id, stock_symbol, favourite_status, stock_name="Null", stock_description="Null")
+        db.add(new_favourite)
+        return db
+    else:
+        return None
 
 ## this can be used to change fav status
 def update_favourite_status(user_id, stock_symbol, new_favourite_status):
-    pass
+    favourite_search = db.query(Portfolio)\
+        .filter(Favourite.user_id == user_id)\
+            .filter(and_(
+                Favourite.stock_symbol == stock_symbol
+            ))
+    if favourite_search is not None:
+        db.query(Portfolio)\
+            .filter(Favourite.user_id == user_id)\
+                .filter(and_(
+                    Favourite.stock_symbol == stock_symbol
+                    )).update({"favourite_status": new_favourite_status})
+        return db
 
 def get_session():
     return db

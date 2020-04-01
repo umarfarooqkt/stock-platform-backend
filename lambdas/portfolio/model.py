@@ -15,7 +15,7 @@ class Portfolio(Base):
     user_id = Column(String(255), primary_key=True)
 
     def __init__(self, user_id):
-        self.user_id
+        self.user_id = user_id
 
     def serialize(self):
         return {
