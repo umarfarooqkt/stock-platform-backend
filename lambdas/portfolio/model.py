@@ -46,3 +46,6 @@ class Favourite(Base):
             "stock_name" : self.stock_name,
             "stock_description" : self.stock_description
         }
+
+from database_manager import create_database_schema, engine
+create_database_schema(engine)
