@@ -3060,6 +3060,11 @@ stealthy-require@^1.1.1:
   resolved "https://registry.yarnpkg.com/stealthy-require/-/stealthy-require-1.1.1.tgz#35b09875b4ff49f26a777e509b3090a3226bf24b"
   integrity sha1-NbCYdbT/SfJqd35QmzCQoyJr8ks=
 
+stock-platform-backend-directory@./lambdas/directory:
+  version "1.0.0"
+  dependencies:
+    http-status "^1.4.2"
+
 stock-platform-backend-graph-hello@./lambdas/graph/hello:
   version "1.0.0"
   dependencies:
@@ -3071,8 +3076,8 @@ stock-platform-backend-portfolio-hello@./lambdas/portfolio/hello:
     http-status "^1.4.2"
     mysql "^2.18.1"
 
-stock-platform-backend-stock@./lambdas/stock:
-  version "0.0.0"
+stock-platform-backend-sign-up@./lambdas/sign-up:
+  version "1.0.0"
 
 string-length@^3.1.0:
   version "3.1.0"
