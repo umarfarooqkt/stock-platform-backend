@@ -23,7 +23,7 @@ if not DB_OVERRIDE:
     user = secrets["username"]
     password = secrets["password"]
     database = secrets["dbname"]
-    port = secrets["port"]
+    port = str(secrets["port"])
     log = False
 else:
     host = 'localhost'
