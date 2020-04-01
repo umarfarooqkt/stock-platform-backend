@@ -36,7 +36,7 @@ else:
 
 # Create database connection
 
-connection_credentials = MYSQL_CONNECTOR + '://' + user + ':' + password + '@' + host + ':' + port + '/' + database
+connection_credentials = MYSQL_CONNECTOR + '://' + user + ':' + password + '@' + host + ':' + str(port) + '/' + database
 engine = create_engine(connection_credentials, echo=log)
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
