@@ -42,9 +42,7 @@ def get_all_unfavourite(user_id):
 def add_favourite(user_id, stock_symbol, favourite_status):
     old_favourite = db.query(Portfolio)\
         .filter(Favourite.user_id == user_id)\
-            .filter(and_(
-                Favourite.stock_symbol == stock_symbol
-            ))
+            .filter(Favourite.stock_symbol == stock_symbol).first()
     if old_favourite is None:
         new_favourite = Portfolio(user_id, stock_symbol, favourite_status, stock_name="Null", stock_description="Null")
         db.add(new_favourite)
