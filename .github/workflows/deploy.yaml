@@ -13,7 +13,6 @@ env:
   BUILD_BUCKET: cs4471-group1-project-backend-builds
   FRONTEND_BUCKET: cs4471-group1-project-frontend
   FRONTEND_DOMAIN: cs4471-stock-platform.xyz
-  FRONTEND_LOGIN_SUBDOMAIN: cs4471-group1-project-login
 
 jobs:
   test:
@@ -61,4 +60,3 @@ jobs:
           --no-fail-on-empty-changeset --parameter-overrides ParameterKey=EnvType,ParameterValue=prod
           ParameterKey=FrontendBucketName,ParameterValue=$FRONTEND_BUCKET
           ParameterKey=FrontendDomain,ParameterValue=$FRONTEND_DOMAIN
-          ParameterKey=FrontendLoginSubDomain,ParameterValue=$FRONTEND_LOGIN_SUBDOMAIN
