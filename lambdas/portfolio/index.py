@@ -118,5 +118,6 @@ def serialize_list(data_list):
     for i in data_list:
         serialized_data_list.append(i.serialize())
     return serialized_data_list
+
 class RequestNotValidException(Exception):
     pass
