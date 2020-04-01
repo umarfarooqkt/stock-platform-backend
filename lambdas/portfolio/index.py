@@ -44,7 +44,7 @@ def get_all_favourites(query_params, user_id):
 def get_all_unfavourites(query_params, user_id):
     unfavourite_list = db.get_all_unfavourite(user_id)
     if unfavourite_list:
-        resp = response(unfavourite_list.serialize(), HTTPStatus.OK)
+        resp = response(serialize_list(unfavourite_list), HTTPStatus.OK)
     else:
         resp = response(unfavourite_list, HTTPStatus.NOT_FOUND)
     return resp
@@ -52,7 +52,7 @@ def get_all_unfavourites(query_params, user_id):
 def get_user_portfolio(query_params, user_id):
     user_id_portfolio = db.get_user(user_id)
     if user_id_portfolio:
-        resp = response(user_id_portfolio.serialize(), HTTPStatus.OK)
+        resp = response(serialize_list(user_id_portfolio.serialize), HTTPStatus.OK)
     else:
         resp = response(user_id_portfolio, HTTPStatus.NOT_FOUND)
     return resp
@@ -60,7 +60,7 @@ def get_user_portfolio(query_params, user_id):
 def add_favourite(body, user_id):
     stock_symbol = body["stock_symbol"]
     status = body["favourite_status"]
-    added_favourite = db.get_user(user_id)
+    added_favourite = db.get_favourite(user_id)
     if added_favourite:
         return db.add_favourite(user_id, stock_symbol, status)
     else:
@@ -69,10 +69,11 @@ def add_favourite(body, user_id):
 
 def update_favourite(body, user_id):
     stock_symbol = body["stock_symbol"]
-    status = body["favourite_status"]
-    added_favourite = db.get_user(user_id)
-    if added_favourite:
-        return db.add_favourite(user_id, stock_symbol, status)
+    status = body["update_favourite_status"]
+    updated_favourite = db.get_favourite(user_id)
+    if updated_favourite:
+        return db.update_favourite_status(user_id, stock_symbol, status)
+        
     else:
         msg = "Company with symbol " + stock_symbol + " not found"
         raise Exception(msg)
@@ -100,17 +101,22 @@ def post_handler(body, path, user_id):
     body = json.loads(body)
     if "addfavourite" in path:
         ## posts can be added here look at handler in stock service
-        resp = add_favourite(body, user_id)
+        session = add_favourite(body, user_id)
     if "updatefavourite" in path:
-        resp = update_favourite(body, user_id)
+        session = update_favourite(body, user_id)
     else:
         msg = "The '" + path + "' is not supported"
         resp = response(msg, HTTPStatus.BAD_REQUEST)
         return resp
-    db.get_session().commit()
+    session.commit()
     msg = "success!"
     resp = response(msg, HTTPStatus.CREATED)
     return resp
 
+def serialize_list(data_list):
+    serialized_data_list = []
+    for i in data_list:
+        serialized_data_list.append(i.serialize())
+    return serialized_data_list
 class RequestNotValidException(Exception):
     pass

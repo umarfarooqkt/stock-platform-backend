@@ -9,7 +9,7 @@ from database_manager import db
 from model import Favourite
 from model import Portfolio
 import sqlalchemy
-from sqlalchemy import or_, and_
+from sqlalchemy import or_
 
 def get_user(user_id):
     user = db.query(Portfolio)\
@@ -38,11 +38,18 @@ def get_all_unfavourite(user_id):
                 Favourite.favourite_status == None))
     return favourite_list
 
-# to create new entry, don't forget to check/add user first
-def add_favourite(user_id, stock_symbol, favourite_status):
-    old_favourite = db.query(Favourite)\
+def get_favourite(user_id, stock_symbol, favourite_status):
+    favourite = db.query(Favourite)\
         .filter(Favourite.user_id == user_id)\
             .filter(Favourite.stock_symbol == stock_symbol).first()
+    if favourite:
+        return favourite
+    else:
+        return None
+
+# to create new entry, don't forget to check/add user first
+def add_favourite(user_id, stock_symbol, favourite_status):
+    old_favourite = get_favourite(user_id, stock_symbol, favourite_status)
     if old_favourite is None:
         new_favourite = Portfolio(user_id, stock_symbol, favourite_status, stock_name="Null", stock_description="Null")
         db.add(new_favourite)
@@ -54,16 +61,12 @@ def add_favourite(user_id, stock_symbol, favourite_status):
 def update_favourite_status(user_id, stock_symbol, new_favourite_status):
     favourite_search = db.query(Favourite)\
         .filter(Favourite.user_id == user_id)\
-            .filter(and_(
-                Favourite.stock_symbol == stock_symbol
-            ))
+            .filter(Favourite.stock_symbol == stock_symbol).first()
     if favourite_search is not None:
-        db.query(Favourite)\
-            .filter(Favourite.user_id == user_id)\
-                .filter(and_(
-                    Favourite.stock_symbol == stock_symbol
-                    )).update({"favourite_status": new_favourite_status})
+        favourite_search.favourite_status = new_favourite_status
         return db
+    else:
+        return None
 
 def get_session():
     return db
