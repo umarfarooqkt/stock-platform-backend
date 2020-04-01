@@ -40,7 +40,7 @@ def get_all_unfavourite(user_id):
 
 # to create new entry, don't forget to check/add user first
 def add_favourite(user_id, stock_symbol, favourite_status):
-    old_favourite = db.query(Portfolio)\
+    old_favourite = db.query(Favourite)\
         .filter(Favourite.user_id == user_id)\
             .filter(Favourite.stock_symbol == stock_symbol).first()
     if old_favourite is None:
@@ -52,13 +52,13 @@ def add_favourite(user_id, stock_symbol, favourite_status):
 
 ## this can be used to change fav status
 def update_favourite_status(user_id, stock_symbol, new_favourite_status):
-    favourite_search = db.query(Portfolio)\
+    favourite_search = db.query(Favourite)\
         .filter(Favourite.user_id == user_id)\
             .filter(and_(
                 Favourite.stock_symbol == stock_symbol
             ))
     if favourite_search is not None:
-        db.query(Portfolio)\
+        db.query(Favourite)\
             .filter(Favourite.user_id == user_id)\
                 .filter(and_(
                     Favourite.stock_symbol == stock_symbol
