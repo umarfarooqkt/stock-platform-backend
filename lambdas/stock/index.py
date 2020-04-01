@@ -51,6 +51,14 @@ def get_quote(query_params):
         resp = response(msg, HTTPStatus.NOT_FOUND)
     return resp
 
+def get_all_stocks(query_params):
+    company = db.get_all_stocks(query_params["symbol"])
+    if company:
+        resp = response(serialize_list(company), HTTPStatus.OK)
+    else:
+        resp = response(company, HTTPStatus.NOT_FOUND)
+    return resp
+
 def post_quote(body):
     date_time = datetime.strptime(body["date_time"], "%d-%m-%Y-%H:%M")
     price = body.get("price")
@@ -73,6 +81,8 @@ def get_handler(query_params, path):
             resp = get_quote(query_params)
         elif "company" in path:
             resp = get_company(query_params)
+        elif "allstock" in path:
+            resp = get_all_stocks(query_params)
         elif "ping" in path:
             resp = response("I am alive!", HTTPStatus.OK)
         else:
@@ -97,6 +107,12 @@ def post_handler(body, path):
     msg = "success!"
     resp = response(msg, HTTPStatus.CREATED)
     return resp
+
+def serialize_list(data_list):
+    serialized_data_list = []
+    for i in data_list:
+        serialized_data_list.append(i.serialize())
+    return serialized_data_list
 
 class RequestNotValidException(Exception):
     pass

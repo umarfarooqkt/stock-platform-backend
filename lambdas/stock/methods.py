@@ -39,5 +39,10 @@ def add_price(symbol, date_time, price):
     else:
         return None
 
+def get_all_price_for_company(symbol):
+    stock_list = db.query(Price)\
+        .filter(Price.company_symbol == symbol)
+    return stock_list
+
 def get_session():
     return db
