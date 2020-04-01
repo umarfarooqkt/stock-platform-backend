@@ -41,6 +41,7 @@ engine = create_engine(connection_credentials, echo=log)
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 db = Session()
+db.create_database_schema(engine)
 
 # Utility methods
 
