@@ -17,7 +17,7 @@ RDS_SECRET_ARN = os.environ.get("RDS_SECRET_ARN")
 AWS_REGION = os.environ.get("AWS_REGION")
 MYSQL_CONNECTOR = 'mysql+mysqlconnector'
 
-if DB_OVERRIDE:
+if not DB_OVERRIDE:
     secrets = secrets_manager.get_secret()
     host = secrets["host"]
     user = secrets["username"]
