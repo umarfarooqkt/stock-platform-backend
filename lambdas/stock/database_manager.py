@@ -27,7 +27,7 @@ if not DB_OVERRIDE:
     log = False
 else:
     host = 'localhost'
-    host =  "docker.for.mac.localhost"
+     # host =  "docker.for.mac.localhost"
     user = 'root'
     password = 'abcd123'
     database = 'stock'
@@ -41,7 +41,6 @@ engine = create_engine(connection_credentials, echo=log)
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 db = Session()
-db.create_database_schema(engine)
 
 # Utility methods
 
