@@ -17,17 +17,17 @@ RDS_SECRET_ARN = os.environ.get("RDS_SECRET_ARN")
 AWS_REGION = os.environ.get("AWS_REGION")
 MYSQL_CONNECTOR = 'mysql+mysqlconnector'
 
-if DB_OVERRIDE:
+if not DB_OVERRIDE:
     secrets = secrets_manager.get_secret()
     host = secrets["host"]
     user = secrets["username"]
     password = secrets["password"]
     database = secrets["dbname"]
-    port = secrets["port"]
+    port = str(secrets["port"])
     log = False
 else:
     host = 'localhost'
-    host =  "docker.for.mac.localhost"
+     # host =  "docker.for.mac.localhost"
     user = 'root'
     password = 'abcd123'
     database = 'stock'

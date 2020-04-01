@@ -7,8 +7,6 @@ Parameters:
     Type: String
   FrontendDomain:
     Type: String
-  FrontendLoginSubDomain:
-    Type: String
   EnvType:
     Type: String
     Default: local
