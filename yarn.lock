@@ -3031,12 +3031,6 @@ stock-platform-backend-graph-hello@./lambdas/graph/hello:
   version "1.0.0"
   dependencies:
     http-status "^1.4.2"
-
-stock-platform-backend-portfolio@./lambdas/portfolio:
-  version "0.0.0"
-
-stock-platform-backend-stock@./lambdas/stock:
-  version "0.0.0"
   
 stock-platform-backend-sign-up@./lambdas/sign-up:
   version "1.0.0"
