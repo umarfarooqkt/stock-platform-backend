@@ -19,7 +19,6 @@
   "dependencies": {
     "stock-platform-backend-directory": "./lambdas/directory",
     "stock-platform-backend-graph-hello": "./lambdas/graph/hello",
-    "stock-platform-backend-portfolio-hello": "./lambdas/portfolio/hello",
     "stock-platform-backend-sign-up": "./lambdas/sign-up"
   },
   "devDependencies": {
