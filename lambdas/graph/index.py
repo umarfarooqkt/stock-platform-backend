@@ -62,7 +62,7 @@ def get_past_30_days(query_params):
             return error_response(msg, HTTPStatus.INTERNAL_SERVER_ERROR)
     else:
         msg = "Company data doesn't exist"
-        return error_response(msg, HTTPStatus.BAD_REQUEST)
+        return error_response(msg, HTTPStatus.NOT_FOUND)
 
 def get_analysis(company, present_date, thirty_days_date):
     payload = { 
