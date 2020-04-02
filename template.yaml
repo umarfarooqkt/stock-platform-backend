@@ -88,19 +88,19 @@ Resources:
           Properties:
             Path: /graph/getdatacompany
             Method: GET
-#             Auth:
-#               Authorizer: CognitoAuthorizer
-#               AuthorizationScopes:
-#                 - user-api/user:manage
+            Auth:
+              Authorizer: CognitoAuthorizer
+              AuthorizationScopes:
+                - user-api/user:manage
         ApiPingGet:
           Type: Api
           Properties:
             Path: /graph/ping
             Method: GET
-#             Auth:
-#               Authorizer: CognitoAuthorizer
-#               AuthorizationScopes:
-#                 - user-api/user:manage
+            Auth:
+              Authorizer: CognitoAuthorizer
+              AuthorizationScopes:
+                - user-api/user:manage
 
   PortfolioFunction:
     Type: AWS::Serverless::Function
