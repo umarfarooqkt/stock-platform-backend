@@ -17,7 +17,7 @@ def handler(event, context):
 
     try:
         if method == 'GET':
-            print("and now we are here")
+           print("and now we are here")
            resp = get_handler(query_params, path)
     except Exception as e:
         print("Exception_handler ",str(e))
