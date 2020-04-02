@@ -44,5 +44,9 @@ def get_all_price_for_company(symbol):
         .filter(Price.company_symbol == symbol)
     return stock_list
 
+def get_all_companies():
+    stock_companies = db.query(Company).all()
+    return stock_companies
+
 def get_session():
     return db
