@@ -76,23 +76,31 @@ Resources:
             Path: /analysis/hello
             Method: POST
 
-  GraphHelloFunction:
+  GraphFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambdas/graph/hello
+      CodeUri: lambdas/graph
       Handler: index.handler
-      Runtime: nodejs12.x
+      Runtime: python3.7
       Events:
         ApiGet:
           Type: Api
           Properties:
-            Path: /graph/hello
+            Path: /graph/getdatacompany
             Method: GET
-        ApiPost:
+            Auth:
+              Authorizer: CognitoAuthorizer
+              AuthorizationScopes:
+                - user-api/user:manage
+        ApiPingGet:
           Type: Api
           Properties:
-            Path: /graph/hello
-            Method: POST
+            Path: /graph/ping
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+              AuthorizationScopes:
+                - user-api/user:manage
 
   PortfolioFunction:
     Type: AWS::Serverless::Function
