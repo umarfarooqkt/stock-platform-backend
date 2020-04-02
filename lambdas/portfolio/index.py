@@ -11,7 +11,7 @@ def handler(event, context):
     query_params = event.get("queryStringParameters")
     path = event.get("path").lower()
     body = event.get("body")
-    user_id = event["requestContext"]["authorizer"]["claim"]["sub"]
+    user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
 
     try:
         if method == 'GET':
