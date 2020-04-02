@@ -9,14 +9,17 @@ import methods as db
 def handler(event, context):
     method = event.get("httpMethod")
     query_params = event.get("queryStringParameters")
-    path = event.get("path").lower()
+    path = event.get("path")
+    if path:
+        path = path.lower()
+    
     body = event.get("body")
-    print(event["requestContext"])
     records = event.get("records")
+    print(event)
 
     #SNS
     if records:
-        user_id = records[0]["body"]["Message"]["sub"]
+        user_id = json.loads(records[0]["body"]["Message"])["sub"]
         try:
             session = create_user(user_id)
             session.commit()
