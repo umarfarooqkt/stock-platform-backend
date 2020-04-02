@@ -37,7 +37,7 @@ def response(msg, status):
 def get_all_favourites(query_params, user_id):
     favourite_list = db.get_all_favourite(user_id)
     if favourite_list:
-        resp = response(favourite_list.serialize(), HTTPStatus.OK)
+        resp = response(serialize_list(favourite_list), HTTPStatus.OK)
     else:
         resp = response(favourite_list, HTTPStatus.NOT_FOUND)
     return resp
@@ -53,7 +53,7 @@ def get_all_unfavourites(query_params, user_id):
 def get_user_portfolio(query_params, user_id):
     user_id_portfolio = db.get_user(user_id)
     if user_id_portfolio:
-        resp = response(serialize_list(user_id_portfolio.serialize), HTTPStatus.OK)
+        resp = response(user_id_portfolio.serialize(), HTTPStatus.OK)
     else:
         resp = response(user_id_portfolio, HTTPStatus.NOT_FOUND)
     return resp
