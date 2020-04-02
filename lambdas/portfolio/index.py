@@ -5,6 +5,7 @@ from http import HTTPStatus
 import json
 import pprint
 import methods as db
+from database_manager import ORIGIN 
 
 def handler(event, context):
     method = event.get("httpMethod")
@@ -16,6 +17,8 @@ def handler(event, context):
     body = event.get("body")
     records = event.get("Records")
     print(event)
+
+    print(body)
 
     #SNS
     if records:
@@ -55,6 +58,9 @@ def create_user(user_id):
 
 def response(msg, status):
     response = {
+        "header": {
+            "origin": ORIGIN
+        }
         "statusCode" : status,
         "body" : json.dumps(msg)
     }
