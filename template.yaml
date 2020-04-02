@@ -58,23 +58,23 @@ Globals:
 Resources:
   ##################### Lambda Functions & API Events #####################
 
-  AnalysisHelloFunction:
+  AnalysisFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambdas/analysis/hello
+      CodeUri: lambdas/analysis
       Handler: index.handler
-      Runtime: nodejs12.x
+      Runtime: python3.7
       Events:
-        ApiGet:
+        ApiAnalytics:
           Type: Api
           Properties:
-            Path: /analysis/hello
+            Path: /analysis/analytics
             Method: GET
-        ApiPost:
+        ApiPing:
           Type: Api
           Properties:
-            Path: /analysis/hello
-            Method: POST
+            Path: /analysis/ping
+            Method: GET
 
   GraphFunction:
     Type: AWS::Serverless::Function
