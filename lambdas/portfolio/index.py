@@ -14,7 +14,7 @@ def handler(event, context):
         path = path.lower()
     
     body = event.get("body")
-    records = event.get("records")
+    records = event.get("Records")
     print(event)
 
     #SNS
