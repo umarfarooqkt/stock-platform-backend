@@ -13,18 +13,14 @@ def handler(event, context):
     query_params = event.get("queryStringParameters")
     path = event.get("path").lower()
     body = event.get("body")
-    print("we are here")
-
+    
     try:
         if method == 'GET':
-           print("and now we are here")
            resp = get_handler(query_params, path)
-           print("I don't understand")
     except Exception as e:
         print("Exception_handler ",str(e))
         resp = error_response(str(e), HTTPStatus.INTERNAL_SERVER_ERROR)
     finally:
-        print(resp)
         return resp
 
 def error_response(msg, status):
@@ -35,19 +31,16 @@ def error_response(msg, status):
     return response
 
 def correct_response(graph, analysis, status):
-    print("is it this?")
     response = {
-        "statusCode" : status,
-         "headers": {
+        "headers": {
             "Access-Control-Allow-Origin": os.environ.get("ORIGIN")
         },
+        "statusCode" : status,
         "body" : json.dumps({
             "graph_data": graph,
             "analysis": analysis
         })
     }
-    print("why?")
-    print(response)
     return response
 
 def get_past_30_days(query_params):
@@ -104,14 +97,11 @@ def generate_dates():
     return list_of_dates
 
 def get_company_data(company):
-    print("hey")
     payload = { "symbol": company }
     companyRequest = requests.get('https://api.cs4471-stock-platform.xyz/v1/stock/allstocks', params=payload)
     if companyRequest.status_code == 200:
-        print("heyo")
         return companyRequest.json()
     else:
-        print("uh oh")
         return None
 
 def get_handler(query_params, path):
@@ -120,7 +110,6 @@ def get_handler(query_params, path):
             resp = error_response("I am alive!", HTTPStatus.OK)
             ## gets can be added here look in index for stock service
         elif "getdatacompany" in path:
-            print("sup")
             resp = get_past_30_days(query_params)
         return resp
     except KeyError as e:
