@@ -5,6 +5,7 @@ from http import HTTPStatus
 import json
 import pprint
 import methods as db
+from database_manager import ORIGIN 
 
 def handler(event, context):
     method = event.get("httpMethod")
@@ -14,12 +15,14 @@ def handler(event, context):
         path = path.lower()
     
     body = event.get("body")
-    records = event.get("records")
+    records = event.get("Records")
     print(event)
+
+    print(body)
 
     #SNS
     if records:
-        user_id = json.loads(records[0]["body"]["Message"])["sub"]
+        user_id = json.loads(json.loads(records[0]["body"])["Message"])["sub"]
         try:
             session = create_user(user_id)
             session.commit()
@@ -55,6 +58,9 @@ def create_user(user_id):
 
 def response(msg, status):
     response = {
+        "header": {
+            "origin": ORIGIN
+        }
         "statusCode" : status,
         "body" : json.dumps(msg)
     }
