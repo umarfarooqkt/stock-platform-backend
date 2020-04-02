@@ -41,10 +41,10 @@ def correct_response(graph, analysis, status):
          "headers": {
             "Access-Control-Allow-Origin": os.environ.get("ORIGIN")
         },
-        "body" : {
-            "graph_data": json.dumps(graph),
-            "analysis": json.dumps(analysis)
-        }
+        "body" : json.dumps({
+            "graph_data": graph,
+            "analysis": analysis
+        })
     }
     print("why?")
     print(response)
