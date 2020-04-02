@@ -123,6 +123,7 @@ Resources:
           Type: SQS
           Properties:
             BatchSize: 1
+            Queue: !GetAtt UserCreatePortfolioQueue.Arn
         ApiPingGet:
           Type: Api
           Properties:
