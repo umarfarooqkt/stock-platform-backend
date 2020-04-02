@@ -12,7 +12,6 @@ def handler(event, context):
     query_params = event.get("queryStringParameters")
     path = event.get("path").lower()
     body = event.get("body")
-    user = event["authorizer"]["claim"]["sub"]
 
     try:
         if method == 'GET':
@@ -47,7 +46,7 @@ def get_past_30_days(query_params):
         list_of_dates = generate_dates()
         list_of_stocks = filter_dates(json.loads(company_data), list_of_dates)
         thirty_days_date = (datetime.datetime.now() - datetime.timedelta(30)).date()
-        analysis_data = get_analysis(company, datetime.datetime.now().date, thirty_days_date)
+        analysis_data = get_analysis(company, datetime.datetime.now().date(), thirty_days_date)
         if analysis_data:
             return correct_response(list_of_stocks, analysis_data, HTTPStatus.OK)
         else:
@@ -60,10 +59,10 @@ def get_past_30_days(query_params):
 def get_analysis(company, present_date, thirty_days_date):
     payload = { 
         "symbol": company,
-        "present_date": present_date,
-        "thirty_days_date": thirty_days_date
+        "last_day": present_date,
+        "first_day": thirty_days_date
     }
-    companyRequest = requests.get('https://api.cs4471-stock-platform.xyz/v1/stock/company', params=payload)
+    companyRequest = requests.get('https://api.cs4471-stock-platform.xyz/v1/analysis', params=payload)
     if companyRequest.status_code == 200:
         return companyRequest.json
     else:
@@ -92,7 +91,7 @@ def get_company_data(company):
     payload = { "symbol": company }
     companyRequest = requests.get('https://api.cs4471-stock-platform.xyz/v1/stock/company', params=payload)
     if companyRequest.status_code == 200:
-        return companyRequest.json
+        return companyRequest.json()
     else:
         return None
 
