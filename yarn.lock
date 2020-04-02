@@ -3027,11 +3027,6 @@ stock-platform-backend-directory@./lambdas/directory:
   dependencies:
     http-status "^1.4.2"
 
-stock-platform-backend-graph-hello@./lambdas/graph/hello:
-  version "1.0.0"
-  dependencies:
-    http-status "^1.4.2"
-  
 stock-platform-backend-sign-up@./lambdas/sign-up:
   version "1.0.0"
 
