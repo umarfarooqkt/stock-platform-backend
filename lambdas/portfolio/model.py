@@ -24,7 +24,7 @@ class Portfolio(Base):
         
 class Favourite(Base):
     __tablename__ = 'favourite'
-    user_id = Column(String(255), ForeignKey('portfolio.user_id', primary_key=True))
+    user_id = Column(String(255), ForeignKey('portfolio.user_id'), primary_key=True)
     stock_symbol = Column(String(255), primary_key=True)
     stock_name = Column(String(255))
     stock_description = Column(String(255))
