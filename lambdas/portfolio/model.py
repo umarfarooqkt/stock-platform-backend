@@ -42,6 +42,5 @@ class Favourite(Base):
         return {
             "user_id" : self.user_id,
             "stock_symbol" : self.stock_symbol,
-            "favourite_status" : self.favourite_status,
-            "stock_name" : self.stock_name,
+            "favourite_status" : self.favourite_status
         }

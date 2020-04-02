@@ -32,14 +32,6 @@ def get_all_favourite(user_id):
             .filter(Favourite.favourite_status == True)
     return favourite_list
 
-def get_all_unfavourite(user_id):
-    favourite_list = db.query(Favourite)\
-        .filter(Favourite.user_id == user_id)\
-            .filter(or_(
-                Favourite.favourite_status == False,
-                Favourite.favourite_status == None))
-    return favourite_list
-
 def get_favourite(user_id, stock_symbol, favourite_status):
     favourite = db.query(Favourite)\
         .filter(Favourite.user_id == user_id)\
@@ -49,34 +41,20 @@ def get_favourite(user_id, stock_symbol, favourite_status):
     else:
         return None
 
+def delete_favourite(user_id, stock_symbol):
+    favourite = db.query(Favourite)\
+        .filter(Favourite.user_id == user_id)\
+            .filter(Favourite.stock_symbol == stock_symbol).first()
+    if favourite:
+        db.delete(favourite)
+        return db
+
 # to create new entry, don't forget to check/add user first
 def add_favourite(user_id, stock_symbol, favourite_status):
     old_favourite = get_favourite(user_id, stock_symbol, favourite_status)
-    stock_data = get_stock_data(user_id, stock_symbol)
-    if old_favourite and stock_data is None:
-        new_favourite = Portfolio(user_id, stock_symbol, favourite_status, stock_name=stock_data["symbol"], stock_description="Null")
+    if old_favourite == None:
+        new_favourite = Favourite(user_id, stock_symbol, favourite_status, stock_name="Null", stock_description="Null")
         db.add(new_favourite)
-        return db
-    else:
-        return None
-
-def get_stock_data(user_id, stock_symbol):
-    payload = { 
-        "symbol": stock_symbol,
-    }
-    stock_data = requests.get('https://api.cs4471-stock-platform.xyz/v1/stock/company', params=payload)
-    if stock_data.status_code == 200:
-        return stock_data.json()
-    else:
-        return None
-
-## this can be used to change fav status
-def update_favourite_status(user_id, stock_symbol, new_favourite_status):
-    favourite_search = db.query(Favourite)\
-        .filter(Favourite.user_id == user_id)\
-            .filter(Favourite.stock_symbol == stock_symbol).first()
-    if favourite_search is not None:
-        favourite_search.favourite_status = new_favourite_status
         return db
     else:
         return None
