@@ -132,6 +132,7 @@ def get_handler(query_params, path, user_id):
 
 def post_handler(body, path, user_id):
     body = json.loads(body)
+    print(body)
     if "addfavourite" in path:
         ## posts can be added here look at handler in stock service
         session = add_favourite(body, user_id)
