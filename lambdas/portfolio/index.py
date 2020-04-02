@@ -58,9 +58,9 @@ def create_user(user_id):
 
 def response(msg, status):
     response = {
-        "header": {
-            "origin": ORIGIN
-        }
+        "headers": {
+            "Access-Control-Allow-Origin": ORIGIN
+        },
         "statusCode" : status,
         "body" : json.dumps(msg)
     }
