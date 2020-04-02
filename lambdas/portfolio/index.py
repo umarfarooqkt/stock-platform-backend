@@ -93,7 +93,7 @@ def get_user_portfolio(query_params, user_id):
 def add_favourite(body, user_id):
     stock_symbol = body["stock_symbol"]
     status = body["favourite_status"]
-    added_favourite = db.get_favourite(user_id)
+    added_favourite = db.get_favourite(user_id, stock_symbol, status)
     if added_favourite:
         return db.add_favourite(user_id, stock_symbol, status)
     else:
