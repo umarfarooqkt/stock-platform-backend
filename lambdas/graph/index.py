@@ -19,10 +19,12 @@ def handler(event, context):
         if method == 'GET':
            print("and now we are here")
            resp = get_handler(query_params, path)
+           print("I don't understand")
     except Exception as e:
         print("Exception_handler ",str(e))
         resp = error_response(str(e), HTTPStatus.INTERNAL_SERVER_ERROR)
     finally:
+        print(resp)
         return resp
 
 def error_response(msg, status):
@@ -45,6 +47,7 @@ def correct_response(graph, analysis, status):
         }
     }
     print("why?")
+    print(response)
     return response
 
 def get_past_30_days(query_params):
