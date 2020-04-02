@@ -50,7 +50,7 @@ def get_past_30_days(query_params):
         list_of_dates = generate_dates()
         list_of_stocks = filter_dates(company_data, list_of_dates)
         thirty_days_date = (datetime.now() - timedelta(30)).date()
-        analysis_data = get_analysis(company, datetime.datetime.now().date(), thirty_days_date)
+        analysis_data = "This is broken"#get_analysis(company, datetime.datetime.now().date(), thirty_days_date)
         if analysis_data:
             return correct_response(list_of_stocks, analysis_data, HTTPStatus.OK)
         else:
