@@ -13,9 +13,11 @@ def handler(event, context):
     query_params = event.get("queryStringParameters")
     path = event.get("path").lower()
     body = event.get("body")
+    print("we are here")
 
     try:
         if method == 'GET':
+            print("and now we are here")
            resp = get_handler(query_params, path)
     except Exception as e:
         print("Exception_handler ",str(e))
@@ -92,11 +94,14 @@ def generate_dates():
     return list_of_dates
 
 def get_company_data(company):
+    print("hey")
     payload = { "symbol": company }
     companyRequest = requests.get('https://api.cs4471-stock-platform.xyz/v1/stock/allstocks', params=payload)
     if companyRequest.status_code == 200:
+        print("heyo")
         return companyRequest.json()
     else:
+        print("uh oh")
         return None
 
 def get_handler(query_params, path):
@@ -105,6 +110,7 @@ def get_handler(query_params, path):
             resp = error_response("I am alive!", HTTPStatus.OK)
             ## gets can be added here look in index for stock service
         elif "getdatacompany" in path:
+            print("sup")
             resp = get_past_30_days(query_params)
         return resp
     except KeyError as e:
