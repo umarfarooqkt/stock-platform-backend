@@ -57,6 +57,7 @@ def get_quote(query_params):
 
 def get_all_stocks_for_company(query_params):
     company = db.get_all_price_for_company(query_params["symbol"])
+    print(company)
     if company:
         resp = response(serialize_list(company), HTTPStatus.OK)
     else:
