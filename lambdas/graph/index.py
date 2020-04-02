@@ -25,6 +25,9 @@ def handler(event, context):
 
 def error_response(msg, status):
     response = {
+        "headers": {
+            "Access-Control-Allow-Origin": os.environ.get("ORIGIN")
+        },
         "statusCode" : status,
         "body" : json.dumps(msg)
     }
