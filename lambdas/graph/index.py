@@ -33,6 +33,7 @@ def error_response(msg, status):
     return response
 
 def correct_response(graph, analysis, status):
+    print("is it this?")
     response = {
         "statusCode" : status,
          "headers": {
@@ -43,6 +44,7 @@ def correct_response(graph, analysis, status):
             "analysis": json.dumps(analysis)
         }
     }
+    print("why?")
     return response
 
 def get_past_30_days(query_params):
@@ -50,10 +52,14 @@ def get_past_30_days(query_params):
     company_data = get_company_data(company)
     if company_data:
         list_of_dates = generate_dates()
+        print(list_of_dates)
         list_of_stocks = filter_dates(company_data, list_of_dates)
+        print(list_of_stocks)
         thirty_days_date = (datetime.now() - timedelta(30)).date()
+        print("we almost there")
         analysis_data = "This is broken"#get_analysis(company, datetime.datetime.now().date(), thirty_days_date)
         if analysis_data:
+            print("I just want to sleep")
             return correct_response(list_of_stocks, analysis_data, HTTPStatus.OK)
         else:
             msg = "Error from analysis"
@@ -76,6 +82,7 @@ def get_analysis(company, present_date, thirty_days_date):
 
 def filter_dates(company_data, list_of_dates):
     filtered_company_data = []
+    print("stuff")
     for stock in company_data:
         datetime_object = datetime.strptime(stock["date_time"], '%d-%m-%Y-%H:%M')
         date_stock = datetime_object.date()
