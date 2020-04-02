@@ -12,8 +12,23 @@ def handler(event, context):
     path = event.get("path").lower()
     body = event.get("body")
     print(event["requestContext"])
-    user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
+    records = event.get("records")
 
+    #SNS
+    if records:
+        user_id = records[0]["body"]["Message"]["sub"]
+        try:
+            session = create_user(user_id)
+            session.commit()
+        except Exception as e:
+            print("Exception_handler ",str(e))
+            db.get_session().rollback()
+        finally:
+            db.get_session().close()
+            return
+
+    user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
+    #HTTP
     try:
         if method == 'GET':
            resp = get_handler(query_params, path, user_id)
@@ -26,6 +41,14 @@ def handler(event, context):
     finally:
         db.get_session().close()
         return resp
+
+def create_user(user_id):
+    created_user = db.add_user(user_id)
+    if created_user:
+        return created_user
+    else:
+        msg = "User already exists with id " + user_id
+        raise Exception(msg)
 
 def response(msg, status):
     response = {
