@@ -224,7 +224,12 @@ Resources:
         ApiGetAllStocks:
           Type: Api
           Properties:
-            Path: /stock/getallstocks
+            Path: /stock/allstocks
+            Method: GET
+        ApiGetAllCompanies:
+          Type: Api
+          Properties:
+            Path: /stock/allcompanies
             Method: GET
 
   DirectoryFunction:
