@@ -6,6 +6,7 @@ from datetime import datetime
 import methods as db
 import json
 import pprint
+from database_manager import ORIGIN
 
 def handler(event, context):
     method = event.get("httpMethod")
@@ -28,6 +29,9 @@ def handler(event, context):
 
 def response(msg, status):
     response = {
+        "headers": {
+            "Access-Control-Allow-Origin": ORIGIN
+        },
         "statusCode" : status,
         "body" : json.dumps(msg)
     }

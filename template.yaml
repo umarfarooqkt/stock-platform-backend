@@ -142,15 +142,6 @@ Resources:
               Authorizer: CognitoAuthorizer
               AuthorizationScopes:
                 - user-api/user:manage
-        ApiUnFavouriteAllGet:
-          Type: Api
-          Properties:
-            Path: /portfolio/allunfavourites
-            Method: GET
-            Auth:
-              Authorizer: CognitoAuthorizer
-              AuthorizationScopes:
-                - user-api/user:manage
         ApiGetPortfolio:
           Type: Api
           Properties:
@@ -169,11 +160,11 @@ Resources:
               Authorizer: CognitoAuthorizer
               AuthorizationScopes:
                 - user-api/user:manage
-        ApiPostUpdateFavourite:
+        ApiDeleteFavourite:
           Type: Api
           Properties:
-            Path: /portfolio/updatefavourite
-            Method: POST
+            Path: /portfolio/deletefavourite
+            Method: DELETE
             Auth:
               Authorizer: CognitoAuthorizer
               AuthorizationScopes:
