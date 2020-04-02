@@ -11,6 +11,7 @@ def handler(event, context):
     query_params = event.get("queryStringParameters")
     path = event.get("path").lower()
     body = event.get("body")
+    print(event["requestContext"])
     user_id = event["requestContext"]["authorizer"]["claims"]["sub"]
 
     try:
