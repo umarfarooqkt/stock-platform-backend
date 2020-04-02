@@ -6,6 +6,7 @@ import requests
 from datetime import datetime
 import json
 import pprint
+import os
 
 def handler(event, context):
     method = event.get("httpMethod")
@@ -32,6 +33,9 @@ def error_response(msg, status):
 def correct_response(graph, analysis, status):
     response = {
         "statusCode" : status,
+         "headers": {
+            "Access-Control-Allow-Origin": os.environ.get("ORIGIN")
+        },
         "body" : {
             "graph_data": json.dumps(graph),
             "analysis": json.dumps(analysis)
@@ -40,12 +44,12 @@ def correct_response(graph, analysis, status):
     return response
 
 def get_past_30_days(query_params):
-    company = query_params["company"]
+    company = query_params["symbol"]
     company_data = get_company_data(company)
     if company_data:
         list_of_dates = generate_dates()
-        list_of_stocks = filter_dates(json.loads(company_data), list_of_dates)
-        thirty_days_date = (datetime.datetime.now() - datetime.timedelta(30)).date()
+        list_of_stocks = filter_dates(company_data, list_of_dates)
+        thirty_days_date = (datetime.now() - timedelta(30)).date()
         analysis_data = get_analysis(company, datetime.datetime.now().date(), thirty_days_date)
         if analysis_data:
             return correct_response(list_of_stocks, analysis_data, HTTPStatus.OK)
@@ -59,12 +63,12 @@ def get_past_30_days(query_params):
 def get_analysis(company, present_date, thirty_days_date):
     payload = { 
         "symbol": company,
-        "last_day": present_date,
-        "first_day": thirty_days_date
+        "end_date": present_date,
+        "start_date": thirty_days_date
     }
-    companyRequest = requests.get('https://api.cs4471-stock-platform.xyz/v1/analysis', params=payload)
+    companyRequest = requests.get('https://api.cs4471-stock-platform.xyz/v1/analysis/analytics', params=payload)
     if companyRequest.status_code == 200:
-        return companyRequest.json
+        return companyRequest.json()
     else:
         return None
 
@@ -83,13 +87,13 @@ def filter_dates(company_data, list_of_dates):
 def generate_dates():
     list_of_dates = []
     for i in range(0, 30):
-        date = (datetime.datetime.now() - datetime.timedelta(i)).date()
+        date = (datetime.now() - timedelta(i)).date()
         list_of_dates.append(date)
     return list_of_dates
 
 def get_company_data(company):
     payload = { "symbol": company }
-    companyRequest = requests.get('https://api.cs4471-stock-platform.xyz/v1/stock/company', params=payload)
+    companyRequest = requests.get('https://api.cs4471-stock-platform.xyz/v1/stock/allstocks', params=payload)
     if companyRequest.status_code == 200:
         return companyRequest.json()
     else:
@@ -106,7 +110,6 @@ def get_handler(query_params, path):
     except KeyError as e:
         msg = "This request is not valid " + str(e) + " " + e.args
         raise RequestNotValidException(msg)
-
 
 class RequestNotValidException(Exception):
     pass
