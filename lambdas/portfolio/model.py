@@ -44,5 +44,4 @@ class Favourite(Base):
             "stock_symbol" : self.stock_symbol,
             "favourite_status" : self.favourite_status,
             "stock_name" : self.stock_name,
-            "stock_description" : self.stock_description
         }

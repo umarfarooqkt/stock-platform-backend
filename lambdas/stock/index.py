@@ -51,8 +51,16 @@ def get_quote(query_params):
         resp = response(msg, HTTPStatus.NOT_FOUND)
     return resp
 
-def get_all_stocks(query_params):
+def get_all_stocks_for_company(query_params):
     company = db.get_all_price_for_company(query_params["symbol"])
+    if company:
+        resp = response(serialize_list(company), HTTPStatus.OK)
+    else:
+        resp = response(company, HTTPStatus.NOT_FOUND)
+    return resp
+
+def get_all_companies():
+    company = db.get_all_companies()
     if company:
         resp = response(serialize_list(company), HTTPStatus.OK)
     else:
@@ -82,7 +90,9 @@ def get_handler(query_params, path):
         elif "company" in path:
             resp = get_company(query_params)
         elif "allstock" in path:
-            resp = get_all_stocks(query_params)
+            resp = get_all_stocks_for_company(query_params)
+        elif "allcompanies" in path:
+            resp = get_all_companies()
         elif "ping" in path:
             resp = response("I am alive!", HTTPStatus.OK)
         else:
