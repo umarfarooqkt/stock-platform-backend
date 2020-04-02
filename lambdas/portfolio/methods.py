@@ -10,6 +10,7 @@ from model import Favourite
 from model import Portfolio
 import sqlalchemy
 from sqlalchemy import or_
+import requests
 
 def get_user(user_id):
     user = db.query(Portfolio)\
@@ -51,11 +52,18 @@ def get_favourite(user_id, stock_symbol, favourite_status):
 def add_favourite(user_id, stock_symbol, favourite_status):
     old_favourite = get_favourite(user_id, stock_symbol, favourite_status)
     if old_favourite is None:
+        stock_data = get_stock_data(user_id, stock_symbol)
         new_favourite = Portfolio(user_id, stock_symbol, favourite_status, stock_name="Null", stock_description="Null")
         db.add(new_favourite)
         return db
     else:
         return None
+
+def get_stock_data(user_id, stock_symbol):
+    payload = { 
+        "symbol": stock_symbol,
+    }
+    stock_data = requests.get('https://api.cs4471-stock-platform.xyz/v1/stock/company', params=payload)
 
 ## this can be used to change fav status
 def update_favourite_status(user_id, stock_symbol, new_favourite_status):
