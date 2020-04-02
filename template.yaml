@@ -119,6 +119,10 @@ Resources:
                 - secretsmanager:GetSecretValue
               Resource: !Ref PortfolioDatabaseCredentials
       Events:
+        SQSRead:
+          Type: SQS
+          Properties:
+            BatchSize: 1
         ApiPingGet:
           Type: Api
           Properties:
