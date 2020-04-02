@@ -19,7 +19,7 @@ def handler(event, context):
 
     #SNS
     if records:
-        user_id = json.loads(records[0]["body"]["Message"])["sub"]
+        user_id = json.loads(json.loads(records[0]["body"])["Message"])["sub"]
         try:
             session = create_user(user_id)
             session.commit()
